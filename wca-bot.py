@@ -94,7 +94,7 @@ def obtener_torneos(url):
         return []
 
 # Función para verificar si hay torneos nuevos cada 12 horas
-@tasks.loop(hours=12)
+@tasks.loop(hours=24)
 async def verificar_torneos_nuevos():
     print("Verificando torneos nuevos...")
     # Obtener el canal de Discord
