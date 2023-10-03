@@ -144,6 +144,8 @@ torneos_conocidos = cargar_torneos_conocidos('torneos.json')
 @bot.command(name='torneos', help='Muestra los torneos actuales.')
 async def mostrar_torneos(ctx):
     torneos = obtener_torneos(URL)
+    test = cargar_torneos_conocidos()
+    print(test)
     if len(torneos) > 0:
         mensaje = f'**{ctx.author.mention}, estos son los torneos actuales 🏆:**\n\n'
         for torneo in torneos:
