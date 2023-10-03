@@ -1,4 +1,5 @@
 import time
+import psycopg2
 import discord
 from discord.ext import commands, tasks
 from bs4 import BeautifulSoup
@@ -18,6 +19,14 @@ TOKEN = os.getenv('TOKEN') # Token del bot
 GUILD_ID = os.getenv('GUILD_ID')  # ID del servidor de Discord
 CHANNEL_ID = os.getenv('CHANNEL_ID')  # ID del canal de Discord
 
+# Conectarse a la base de datos de PostgreSQL
+DB_URL = os.getenv('DATABASE_URL')
+DB_NAME = os.getenv('PGDATABASE')
+DB_PORT = os.getenv('PGPORT')
+DB_HOST = os.getenv('PGHOST')
+DB_USER = os.getenv('PGUSER')
+DB_PASSWORD = os.getenv('PGPASSWORD')
+
 # Definir los intents requeridos
 intents = discord.Intents.default()
 intents.messages = True
@@ -32,26 +41,19 @@ async def on_ready():
     print(f'Bot iniciado correctamente. Conectado como {bot.user.name}')
     verificar_torneos_nuevos.start()  # Iniciar la tarea de verificación de torneos nuevos después de iniciar el bot
 
-# Función para cargar los torneos guardados desde un archivo JSON
-def cargar_torneos_conocidos(archivo):
+# Verificar los torneos guardados en la base de datos
+def cargar_torneos_conocidos():
     try:
-        with open(archivo, 'r', encoding='utf-8') as archivo_json:
-            return json.load(archivo_json)
-    except FileNotFoundError:
-        # Si el archivo no existe, crearlo con una lista vacía
-        with open(archivo, 'w', encoding='utf-8') as archivo_json:
-            json.dump([], archivo_json)
-        return []
-
-# Función para guardar los torneos en un archivo JSON
-def guardar_torneos_en_json(torneos, archivo):
-    try:
-        with open(archivo, 'w', encoding='utf-8') as archivo_json:
-            json.dump(torneos, archivo_json, indent=2, ensure_ascii=False)
-        print('El archivo JSON se guardó correctamente.')
-
-    except Exception as e:
-        print('Error al guardar el archivo JSON:', e)
+        conn = db_conn()
+        cur = conn.cursor()
+        cur.execute('SELECT * FROM torneos;')
+        torneos = cur.fetchall()
+        cur.close()
+        conn.close()
+        print(torneos)
+        return torneos
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
 
 # Función para obtener los torneos desde la URL y retornar una lista de diccionarios con los torneos encontrados
 def obtener_torneos(url):
@@ -104,7 +106,7 @@ async def verificar_torneos_nuevos():
         torneos_actuales = obtener_torneos(URL)
 
         # Cargar los torneos ya guardados
-        torneos_conocidos = cargar_torneos_conocidos('torneos.json')
+        torneos_conocidos = cargar_torneos_conocidos()
 
         # Comparar los torneos actuales con los conocidos
         torneos_nuevos = [torneo for torneo in torneos_actuales if torneo not in torneos_conocidos]
@@ -121,9 +123,17 @@ async def verificar_torneos_nuevos():
             # Enviar el mensaje al canal de Discord
             await canal.send(mensaje)
 
-            # Actualizar la lista de torneos guardados
-            torneos_conocidos.extend(torneos_nuevos)
-            guardar_torneos_en_json(torneos_conocidos, 'torneos.json')
+            # Actualizar la base de datos con los nuevos torneos
+            try:
+                conn = db_conn()
+                cur = conn.cursor()
+                for torneo in torneos_nuevos:
+                    cur.execute('INSERT INTO torneos (nombre, fecha, pais, lugar, url) VALUES (%s, %s, %s, %s, %s);', (torneo['Nombre torneo'], torneo['Fecha'], 'Chile', torneo['Lugar'], torneo['URL']))
+                conn.commit()
+                cur.close()
+                conn.close()
+            except (Exception, psycopg2.DatabaseError) as error:
+                print(error)
 
         else:
             return
@@ -145,6 +155,9 @@ async def mostrar_torneos(ctx):
         await ctx.send(mensaje)
     else:
         await ctx.send('No se han encontrado torneos.')
+
+def db_conn():
+    return psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT)
 
 if __name__ == "__main__":
     # Iniciar el bot
