@@ -47,10 +47,22 @@ def cargar_torneos_conocidos():
         conn = db_conn()
         cur = conn.cursor()
         cur.execute('SELECT * FROM torneos;')
-        torneos = cur.fetchall()
+        resultados = cur.fetchall()
         cur.close()
         conn.close()
-        return torneos
+
+        # Convierte los resultados de la consulta en una lista de diccionarios
+        torneos_conocidos = []
+        for resultado in resultados:
+            torneo = {
+                "Nombre torneo": resultado[1],
+                "URL": resultado[5],
+                "Fecha": resultado[2],
+                "Lugar": resultado[4]
+            }
+            torneos_conocidos.append(torneo)
+
+        return torneos_conocidos
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
