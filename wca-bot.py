@@ -137,8 +137,6 @@ async def verificar_torneos_nuevos():
         else:
             return
 
-# Inicializar la lista de torneos conocidos
-torneos_conocidos = cargar_torneos_conocidos('torneos.json')
 
 @bot.command(name='torneos', help='Muestra los torneos actuales.')
 async def mostrar_torneos(ctx):
