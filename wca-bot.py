@@ -61,7 +61,7 @@ def cargar_torneos_conocidos():
                 "Lugar": resultado[4]
             }
             torneos_conocidos.append(torneo)
-
+        print(torneos_conocidos)
         return torneos_conocidos
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
@@ -164,7 +164,7 @@ async def test(ctx):
 async def mostrar_torneos(ctx):
     torneos = obtener_torneos(URL)
     test = cargar_torneos_conocidos()
-    print(test)
+
     if len(torneos) > 0:
         mensaje = f'**{ctx.author.mention}, estos son los torneos actuales 🏆:**\n\n'
         for torneo in torneos:
