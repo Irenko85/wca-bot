@@ -22,10 +22,10 @@ CHANNEL_ID = os.getenv('CHANNEL_ID')  # ID del canal de Discord
 # Conectarse a la base de datos de PostgreSQL
 DB_URL = os.getenv('DATABASE_URL')
 DB_NAME = os.getenv('PGDATABASE')
-DB_PORT = os.getenv('PGPORT')
 DB_HOST = os.getenv('PGHOST')
-DB_USER = os.getenv('PGUSER')
 DB_PASSWORD = os.getenv('PGPASSWORD')
+DB_PORT = os.getenv('PGPORT')
+DB_USER = os.getenv('PGUSER')
 
 # Definir los intents requeridos
 intents = discord.Intents.default()
@@ -123,20 +123,29 @@ async def verificar_torneos_nuevos():
             await canal.send(mensaje)
 
             # Actualizar la base de datos con los nuevos torneos
-            try:
-                conn = db_conn()
-                cur = conn.cursor()
-                for torneo in torneos_nuevos:
-                    cur.execute('INSERT INTO torneos (nombre, fecha, pais, lugar, url) VALUES (%s, %s, %s, %s, %s);', (torneo['Nombre torneo'], torneo['Fecha'], 'Chile', torneo['Lugar'], torneo['URL']))
-                conn.commit()
-                cur.close()
-                conn.close()
-            except (Exception, psycopg2.DatabaseError) as error:
-                print(error)
+            for torneo in torneos_nuevos:
+                guardar_torneo(torneo)
 
         else:
             return
 
+def guardar_torneo(torneo):
+    try:
+        conn = db_conn()
+        cur = conn.cursor()
+        cur.execute('INSERT INTO torneos (nombre, fecha, pais, lugar, url) VALUES (%s, %s, %s, %s, %s);', (torneo['Nombre torneo'], torneo['Fecha'], 'Chile', torneo['Lugar'], torneo['URL']))
+        conn.commit()
+        cur.close()
+        conn.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+@bot.command(name='test', help='Comando de prueba.')
+async def test(ctx):
+    torneos = obtener_torneos(URL)
+    for torneo in torneos:
+        print(torneo)
+    await ctx.send('Comando de prueba.')
 
 @bot.command(name='torneos', help='Muestra los torneos actuales.')
 async def mostrar_torneos(ctx):
