@@ -50,7 +50,6 @@ def cargar_torneos_conocidos():
         torneos = cur.fetchall()
         cur.close()
         conn.close()
-        print(torneos)
         return torneos
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
