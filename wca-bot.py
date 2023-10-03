@@ -157,7 +157,7 @@ async def test(ctx):
     torneos = obtener_torneos(URL)
     for torneo in torneos:
         print(torneo)
-        guardar_torneo(torneo)
+        # guardar_torneo(torneo)
     await ctx.send('Comando de prueba.')
 
 @bot.command(name='torneos', help='Muestra los torneos actuales.')
