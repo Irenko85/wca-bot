@@ -39,7 +39,8 @@ def cargar_torneos_conocidos():
     try:
         conn = db_conn()
         cur = conn.cursor()
-        cur.execute('SELECT * FROM torneos;')
+        # Obtener los torneos con fecha mayor o igual a la fecha actual
+        cur.execute('SELECT * FROM torneos WHERE fecha >= %s;', (obtener_fecha_actual(),))
         resultados = cur.fetchall()
         cur.close()
         conn.close()
@@ -60,8 +61,9 @@ def cargar_torneos_conocidos():
 
 # Función para obtener los torneos desde la URL y retornar una lista de diccionarios con los torneos encontrados
 # obtener_torneos(url: str) -> list
-def obtener_torneos(url):
+def obtener_torneos(url, pais):
     try:
+        url = url.replace('Chile', pais)
         respuesta = requests.get(url)
         respuesta.raise_for_status() # Genera una excepción si la solicitud no es exitosa
         soup = BeautifulSoup(respuesta.text, 'html.parser')
@@ -110,5 +112,34 @@ def guardar_torneo(torneo: dict):
         conn.commit()
         cur.close()
         conn.close()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+def obtener_fecha_actual():
+    return datetime.now().date()
+
+# Función para eliminar un torneo de la base de datos
+# eliminar_torneo(url: str) -> None
+def eliminar_torneo(url: str):
+    try:
+        conn = db_conn()
+        cur = conn.cursor()
+        cur.execute('DELETE FROM torneos WHERE url = %s;', (url,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        print(f'Se ha eliminado el torneo con URL: {url}')
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+
+def limpiar_base_de_datos():
+    try:
+        conn = db_conn()
+        cur = conn.cursor()
+        cur.execute('DELETE FROM torneos WHERE fecha < %s;', (obtener_fecha_actual(),))
+        conn.commit()
+        cur.close()
+        conn.close()
+        print(f'Se han eliminado los torneos con fecha menor a {obtener_fecha_actual()}')
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)

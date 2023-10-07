@@ -3,7 +3,6 @@ from discord.ext import commands, tasks
 import os
 from dotenv import load_dotenv
 import utils as utils
-import requests
 
 load_dotenv()  # Cargar variables de entorno
 
@@ -15,7 +14,6 @@ Posee los siguientes comandos y funciones:
     - !logo: Envía una imagen con el logo del bot.
 
 TODO:
-    - Agregar función que elimine torneos ya realizados de la base de datos.
     - Agregar funcionalidad al comando !torneos para que muestre los torneos de un país específico, ejemplo !torneos Argentina.
 """
 
@@ -42,6 +40,8 @@ async def on_ready():
 async def verificar_torneos_nuevos():
     # Obtener el canal de Discord
     canal = bot.get_channel(int(CHANNEL_ID))
+    utils.limpiar_base_de_datos()
+
     if canal:
         print("Verificando torneos nuevos...")
         # Obtener los torneos actuales
@@ -75,9 +75,9 @@ async def verificar_torneos_nuevos():
 
 # Comando !torneos
 @bot.command(name = 'torneos', help = 'Muestra los torneos actuales.')
-async def mostrar_torneos(ctx):
-    # Obtener los torneos existentes en la base de datos
-    torneos = utils.cargar_torneos_conocidos()
+async def mostrar_torneos(ctx, pais = 'Chile'):
+    # Obtener los torneos actuales de la página de la WCA
+    torneos = utils.obtener_torneos(utils.URL, pais)
 
     # Si hay torneos existentes, enviar mensaje con los torneos
     if len(torneos) > 0:
