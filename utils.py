@@ -51,7 +51,8 @@ def cargar_torneos_conocidos():
                 "Nombre torneo": resultado[1],
                 "URL": resultado[5],
                 "Fecha": resultado[2],
-                "Lugar": resultado[4]
+                "Lugar": resultado[4],
+                "Pais": resultado[3]
             }
             torneos_conocidos.append(torneo)
 
@@ -61,7 +62,7 @@ def cargar_torneos_conocidos():
 
 # Función para obtener los torneos desde la URL y retornar una lista de diccionarios con los torneos encontrados
 # obtener_torneos(url: str) -> list
-def obtener_torneos(url, pais):
+def obtener_torneos(url, pais = 'Chile'):
     try:
         url = url.replace('Chile', pais)
         respuesta = requests.get(url)
@@ -85,13 +86,14 @@ def obtener_torneos(url, pais):
             url = WCA_URL + enlace['href']
             _fecha = fecha.get_text(strip=True)
             fecha = datetime.strptime(_fecha, "%b %d, %Y").date()
-            lugar = lugar.get_text(strip=True).replace('Chile, ', '')
+            lugar = lugar.get_text(strip=True).replace(pais + ', ', '')
 
             torneo = {
                 "Nombre torneo": nombre_torneo,
                 "URL": url,
                 "Fecha": fecha,
-                "Lugar": lugar
+                "Lugar": lugar,
+                "Pais": pais
             }
 
             torneos.append(torneo)
@@ -108,7 +110,7 @@ def guardar_torneo(torneo: dict):
     try:
         conn = db_conn()
         cur = conn.cursor()
-        cur.execute('INSERT INTO torneos (nombre, fecha, pais, lugar, url) VALUES (%s, %s, %s, %s, %s);', (torneo['Nombre torneo'], torneo['Fecha'], 'Chile', torneo['Lugar'], torneo['URL']))
+        cur.execute('INSERT INTO torneos (nombre, fecha, pais, lugar, url) VALUES (%s, %s, %s, %s, %s);', (torneo['Nombre torneo'], torneo['Fecha'], torneo['Pais'], torneo['Lugar'], torneo['URL']))
         conn.commit()
         cur.close()
         conn.close()

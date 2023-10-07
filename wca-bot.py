@@ -85,7 +85,7 @@ async def mostrar_torneos(ctx, pais = 'Chile'):
         for torneo in torneos:
             mensaje += f'**Nombre:** {torneo["Nombre torneo"]}\n'
             mensaje += f'**Fecha:** {torneo["Fecha"]}\n'
-            mensaje += f'**Lugar:** {torneo["Lugar"]}\n'
+            mensaje += f'**Lugar:** {torneo["Pais"]}, {torneo["Lugar"]}\n'
             mensaje += f'**URL:** {torneo["URL"]}\n\n'
 
         await ctx.send(mensaje)
