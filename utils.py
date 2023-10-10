@@ -148,23 +148,18 @@ def limpiar_base_de_datos():
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+# Función para obtener el país usando la API de la WCA
 def obtener_pais(pais):
     API = 'https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/master/api/countries.json'
     respuesta = requests.get(API)
     respuesta.raise_for_status() # Genera una excepción si la solicitud no es exitosa
     paises = respuesta.json()
 
+    # Listas con los nombres y códigos de los países
     nombres_paises = [p['name'].lower() for p in paises['items']]
     codigos_paises = [p['iso2Code'].lower() for p in paises['items']]
 
-    estados_unidos = ['eeuu', 'united states', 'estados unidos', 'us']
-
-    # Buscar el país estandarizado en base al nombre completo o al código de dos letras
     pais = pais.lower()
-
-    # Si el país está en las reglas, retornar el país estandarizado
-    if pais in estados_unidos:
-        return 'usa'
 
     # Si se proporciona el nombre completo del país, retornar el mismo nombre
     if pais in nombres_paises:
@@ -178,8 +173,6 @@ def obtener_pais(pais):
     # Si no se encuentra una coincidencia exacta, buscar sugerencias de corrección
     sugerencias = difflib.get_close_matches(pais, nombres_paises, n=1, cutoff=0.8)
     if sugerencias:
-        if sugerencias[0] in estados_unidos:
-            return 'usa'
         return nombres_paises[nombres_paises.index(sugerencias[0])]
     
     # Si no se encuentra una sugerencia, retornar Chile
