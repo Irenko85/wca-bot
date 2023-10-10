@@ -155,6 +155,8 @@ def obtener_pais(pais):
     respuesta.raise_for_status() # Genera una excepción si la solicitud no es exitosa
     paises = respuesta.json()
 
+    # IDEA: Traducir el nombre del país al inglés para buscarlo en la API, así se aceptan nombres en español u otro idioma
+
     # Listas con los nombres y códigos de los países
     nombres_paises = [p['name'].lower() for p in paises['items']]
     codigos_paises = [p['iso2Code'].lower() for p in paises['items']]
@@ -163,11 +165,14 @@ def obtener_pais(pais):
 
     # Si se proporciona el nombre completo del país, retornar el mismo nombre
     if pais in nombres_paises:
+        # Se retorna el nombre del país con formato de URL
         return pais.replace(' ', '+')
 
     # Si el argumento es un código de dos letras, retornar el nombre del país
     if pais in codigos_paises:
+        # Se obtiene el índice del código de país
         indice = codigos_paises.index(pais)
+        # Se retorna el nombre del país con formato de URL
         return nombres_paises[indice].replace(' ', '+')
 
     # Si no se encuentra una coincidencia exacta, buscar sugerencias de corrección
