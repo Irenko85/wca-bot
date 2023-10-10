@@ -84,6 +84,7 @@ async def mostrar_torneos(ctx, pais = 'Chile'):
         _pais = utils.obtener_pais(pais).replace('+', ' ').capitalize()
         mensaje = f'**{ctx.author.mention}, estos son los torneos actuales en {_pais} :eyes: :trophy::**\n\n'
         for torneo in torneos:
+            mensaje += f'**{torneos.index(torneo) + 1}.**\n'
             mensaje += f'**Nombre:** {torneo["Nombre torneo"]}\n'
             mensaje += f'**Fecha:** {torneo["Fecha"]}\n'
             mensaje += f'**Lugar:** {torneo["Lugar"]}\n'
