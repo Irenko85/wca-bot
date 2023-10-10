@@ -81,11 +81,12 @@ async def mostrar_torneos(ctx, pais = 'Chile'):
 
     # Si hay torneos existentes, enviar mensaje con los torneos
     if len(torneos) > 0:
-        mensaje = f'**{ctx.author.mention}, estos son los torneos actuales :eyes: :trophy::**\n\n'
+        _pais = utils.obtener_pais(pais).replace('+', ' ').capitalize()
+        mensaje = f'**{ctx.author.mention}, estos son los torneos actuales en {_pais} :eyes: :trophy::**\n\n'
         for torneo in torneos:
             mensaje += f'**Nombre:** {torneo["Nombre torneo"]}\n'
             mensaje += f'**Fecha:** {torneo["Fecha"]}\n'
-            mensaje += f'**Lugar:** {torneo["Pais"]}, {torneo["Lugar"]}\n'
+            mensaje += f'**Lugar:** {torneo["Lugar"]}\n'
             mensaje += f'**URL:** {torneo["URL"]}\n\n'
 
         await ctx.send(mensaje)
