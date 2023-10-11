@@ -90,6 +90,11 @@ async def mostrar_torneos(ctx, pais = 'Chile'):
             mensaje += f'**Lugar:** {torneo["Lugar"]}\n'
             mensaje += f'**URL:** {torneo["URL"]}\n\n'
 
+        # Enviar mensaje al usuario que ejecutó el comando
+        # user = ctx.author
+        # await user.send(mensaje)
+
+        # Enviar mensaje al canal de Discord
         await ctx.send(mensaje)
     else:
         await ctx.send('No se han encontrado torneos.')
