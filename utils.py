@@ -135,7 +135,7 @@ def guardar_torneo(torneo: dict):
     try:
         conn = db_conn()
         cur = conn.cursor()
-        cur.execute('INSERT INTO torneos (nombre, inicio, fin, pais, lugar, url) VALUES (%s, %s, %s, %s, %s, %s);', (torneo['Nombre torneo'], torneo['Fecha inicio'], torneo['Fecha fin'], torneo['Pais'].replace('+', ' ').capitalize(), torneo['Lugar'], torneo['URL']))
+        cur.execute('INSERT INTO torneos (nombre, inicio, fin, pais, lugar, url) VALUES (%s, %s, %s, %s, %s, %s);', (torneo['Nombre torneo'], torneo['Fecha inicio'], torneo['Fecha fin'], torneo['Pais'], torneo['Lugar'], torneo['URL']))
         conn.commit()
         cur.close()
         conn.close()
