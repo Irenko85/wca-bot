@@ -58,7 +58,11 @@ async def verificar_torneos_nuevos():
             mensaje = '¡**@everyone**, se han encontrado nuevos torneos! :tada:\n\n'
             for torneo in torneos_nuevos:
                 mensaje += f'**Nombre:** {torneo["Nombre torneo"]}\n'
-                mensaje += f'**Fecha:** {torneo["Fecha"]}\n'
+                if torneo["Fecha inicio"] == torneo["Fecha fin"]:
+                    mensaje += f'**Fecha:** {torneo["Fecha inicio"]}\n'
+                else:
+                    mensaje += f'**Fecha inicio:** {torneo["Fecha inicio"]}\n'
+                    mensaje += f'**Fecha fin:** {torneo["Fecha fin"]}\n'
                 mensaje += f'**Lugar:** {torneo["Lugar"]}\n'
                 mensaje += f'**URL:** {torneo["URL"]}\n\n'
 
@@ -86,7 +90,11 @@ async def mostrar_torneos(ctx, pais = 'Chile'):
         for torneo in torneos:
             mensaje += f'**{torneos.index(torneo) + 1}.**\n'
             mensaje += f'**Nombre:** {torneo["Nombre torneo"]}\n'
-            mensaje += f'**Fecha:** {torneo["Fecha"]}\n'
+            if torneo["Fecha inicio"] == torneo["Fecha fin"]:
+                mensaje += f'**Fecha:** {torneo["Fecha inicio"]}\n'
+            else:
+                mensaje += f'**Fecha de inicio:** {torneo["Fecha inicio"]}\n'
+                mensaje += f'**Fecha de término:** {torneo["Fecha fin"]}\n'
             mensaje += f'**Lugar:** {torneo["Lugar"]}\n'
             mensaje += f'**URL:** {torneo["URL"]}\n\n'
 

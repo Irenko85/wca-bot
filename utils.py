@@ -32,7 +32,13 @@ DB_USER = os.getenv('PGUSER')
 
 # Función para conectarse a la base de datos
 def db_conn():
-    return psycopg2.connect(dbname=DB_NAME, user=DB_USER, password=DB_PASSWORD, host=DB_HOST, port=DB_PORT)
+    return psycopg2.connect(
+            dbname=DB_NAME,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            host=DB_HOST,
+            port=DB_PORT
+            )
 
 # Verificar los torneos guardados en la base de datos
 # cargar_torneos_conocidos() -> list
@@ -41,7 +47,7 @@ def cargar_torneos_conocidos():
         conn = db_conn()
         cur = conn.cursor()
         # Obtener los torneos con fecha mayor o igual a la fecha actual
-        cur.execute('SELECT * FROM torneos WHERE fecha >= %s;', (obtener_fecha_actual(),))
+        cur.execute('SELECT * FROM torneos WHERE inicio >= %s;', (obtener_fecha_actual(),))
         resultados = cur.fetchall()
         cur.close()
         conn.close()
@@ -50,10 +56,11 @@ def cargar_torneos_conocidos():
         for resultado in resultados:
             torneo = {
                 "Nombre torneo": resultado[1],
-                "URL": resultado[5],
-                "Fecha": resultado[2],
-                "Lugar": resultado[4],
-                "Pais": resultado[3]
+                "URL": resultado[6],
+                "Fecha inicio": resultado[2],
+                "Fecha fin": resultado[3],
+                "Lugar": resultado[5],
+                "Pais": resultado[4]
             }
             torneos_conocidos.append(torneo)
 
@@ -86,14 +93,30 @@ def obtener_torneos(url, pais = 'Chile'):
             enlace = competencia.find('a')
             nombre_torneo = enlace.text.strip()
             url = WCA_URL + enlace['href']
-            _fecha = fecha.get_text(strip=True)
-            fecha = datetime.strptime(_fecha, "%b %d, %Y").date()
+
+            _fecha = fecha.get_text(strip=True).replace(',', '')
+            mes = _fecha.split(' ')[0].strip()
+
+            if '-' in _fecha:
+                anio = _fecha.split(' ')[4]
+
+                _fecha_inicio = mes + ' ' + _fecha.split(' ')[1] + ' ' + anio
+                fecha_inicio = datetime.strptime(_fecha_inicio, "%b %d %Y").date()
+                
+                _fecha_fin = mes + ' ' + _fecha.split(' ')[3] + ' ' + anio
+                fecha_fin = datetime.strptime(_fecha_fin, "%b %d %Y").date()
+                
+            else:
+                fecha_inicio = datetime.strptime(_fecha, "%b %d %Y").date()
+                fecha_fin = fecha_inicio
+
             lugar = lugar.get_text(strip=True).replace(pais + ', ', '')
 
             torneo = {
                 "Nombre torneo": nombre_torneo,
                 "URL": url,
-                "Fecha": fecha,
+                "Fecha inicio": fecha_inicio,
+                "Fecha fin": fecha_fin,
                 "Lugar": lugar,
                 "Pais": pais
             }
@@ -112,7 +135,7 @@ def guardar_torneo(torneo: dict):
     try:
         conn = db_conn()
         cur = conn.cursor()
-        cur.execute('INSERT INTO torneos (nombre, fecha, pais, lugar, url) VALUES (%s, %s, %s, %s, %s);', (torneo['Nombre torneo'], torneo['Fecha'], torneo['Pais'], torneo['Lugar'], torneo['URL']))
+        cur.execute('INSERT INTO torneos (nombre, inicio, fin, pais, lugar, url) VALUES (%s, %s, %s, %s, %s, %s);', (torneo['Nombre torneo'], torneo['Fecha inicio'], torneo['Fecha fin'], torneo['Pais'].replace('+', ' ').capitalize(), torneo['Lugar'], torneo['URL']))
         conn.commit()
         cur.close()
         conn.close()
@@ -140,7 +163,7 @@ def limpiar_base_de_datos():
     try:
         conn = db_conn()
         cur = conn.cursor()
-        cur.execute('DELETE FROM torneos WHERE fecha < %s;', (obtener_fecha_actual(),))
+        cur.execute('DELETE FROM torneos WHERE fin < %s;', (obtener_fecha_actual(),))
         conn.commit()
         cur.close()
         conn.close()
