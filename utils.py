@@ -72,7 +72,7 @@ def cargar_torneos_conocidos():
 # obtener_torneos(url: str) -> list
 def obtener_torneos(url, pais = 'Chile'):
     try:
-        pais = obtener_pais(pais)
+        pais = obtener_pais_para_url(pais)
         url = url.replace('Chile', pais)
         respuesta = requests.get(url)
         respuesta.raise_for_status() # Genera una excepción si la solicitud no es exitosa
@@ -171,8 +171,8 @@ def limpiar_base_de_datos():
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
-# Función para obtener el país usando la API de la WCA
-def obtener_pais(pais):
+# Función para obtener el país usando la API de la WCA y retornar el nombre del país con formato de URL
+def obtener_pais_para_url(pais):
     API = 'https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/master/api/countries.json'
     respuesta = requests.get(API)
     respuesta.raise_for_status() # Genera una excepción si la solicitud no es exitosa
@@ -206,3 +206,7 @@ def obtener_pais(pais):
     # Si no se encuentra una sugerencia, retornar Chile
     print('No se han encontrado coincidencias. Buscando torneos en Chile...')
     return 'Chile'
+
+# Función para obtener el nombre del país con formato de título
+def obtener_pais(pais):
+    return obtener_pais_para_url(pais).title().replace('+', ' ')
