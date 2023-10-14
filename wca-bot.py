@@ -114,7 +114,7 @@ async def enviar_logo(ctx):
 async def test(ctx, pais = 'Chile'):
     torneos = utils.obtener_torneos(utils.URL, pais)
     pais = utils.obtener_pais(pais)
-    embed = discord.Embed(title = f':trophy: Estos son los torneos actuales en {pais} :trophy:', color = discord.Color.blue())
+    embed = discord.Embed(title = f':trophy: {ctx.author}, estos son los torneos actuales en {pais} :trophy:', color = discord.Color.blue())
     embed.set_footer(text = 'WCA Notifier Bot', icon_url = 'https://i.imgur.com/yscsmKO.jpeg')
 
     if not torneos:
