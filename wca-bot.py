@@ -13,9 +13,6 @@ Posee los siguientes comandos y funciones:
     - verificar_torneos_nuevos: Verifica si hay torneos nuevos cada 12 horas y envía una notificación al canal #torneos en caso de encontrar nuevos torneos.
     - !torneos: Muestra los torneos actuales.
     - !logo: Envía una imagen con el logo del bot.
-
-TODO:
-    - Agregar funcionalidad al comando !torneos para que muestre los torneos de un país específico, ejemplo !torneos Argentina.
 """
 
 TOKEN = os.getenv('TOKEN') # Token del bot

@@ -11,9 +11,6 @@ Este módulo contiene funciones para:
 - Obtener los torneos actuales desde una URL de la WCA.
 - Guardar los torneos en una base de datos PostgreSQL.
 - Verificar si hay torneos nuevos cada 12 horas.
-
-TODO:
-    - Agregar función que elimine torneos ya realizados de la base de datos.
 """
 
 # URLs con torneos actuales
