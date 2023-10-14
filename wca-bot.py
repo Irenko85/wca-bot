@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands, tasks
 import os
+from datetime import datetime
 from dotenv import load_dotenv
 import utils as utils
 
@@ -85,7 +86,7 @@ async def mostrar_torneos(ctx, pais = 'Chile'):
 
     # Si hay torneos existentes, enviar mensaje con los torneos
     if len(torneos) > 0:
-        _pais = utils.obtener_pais(pais).replace('+', ' ').capitalize()
+        _pais = utils.obtener_pais(pais)
         mensaje = f'**{ctx.author.mention}, estos son los torneos actuales en {_pais} :eyes: :trophy::**\n\n'
         for torneo in torneos:
             mensaje += f'**{torneos.index(torneo) + 1}.**\n'
@@ -111,6 +112,36 @@ async def mostrar_torneos(ctx, pais = 'Chile'):
 @bot.command(name = 'logo', help = 'Envía una imagen con el logo del bot.')
 async def enviar_logo(ctx):
     await ctx.send('https://i.imgur.com/yscsmKO.jpeg')
+
+@bot.command(name = 'embed-test')
+async def test(ctx, pais = 'Chile'):
+    torneos = utils.obtener_torneos(utils.URL, pais)
+    pais = utils.obtener_pais(pais)
+    embed = discord.Embed(title = f':trophy: Estos son los torneos actuales en {pais} :trophy:', color = discord.Color.blue())
+    embed.set_footer(text = 'WCA Notifier Bot', icon_url = 'https://i.imgur.com/yscsmKO.jpeg')
+
+    if not torneos:
+        embed.title = f':cry: No se han encontrado torneos en {pais} :cry:'
+        await ctx.send(embed = embed)
+        return
+    for torneo in torneos:
+        # Formatear las fechas para que sean mas legibles
+        _fecha_inicio = torneo['Fecha inicio'].strftime('%d/%m/%Y')
+        _fecha_fin = torneo['Fecha fin'].strftime('%d/%m/%Y')
+
+        embed.add_field(name = f'{torneos.index(torneo) + 1}. ' + torneo['Nombre torneo'], value = torneo['URL'], inline = False)
+        embed.add_field(name = ':world_map: ' + 'Lugar', value = torneo['Lugar'], inline = True)
+        if torneo['Fecha inicio'] == torneo['Fecha fin']:
+            embed.add_field(name = ':calendar: ' + 'Fecha', value = _fecha_inicio, inline = True)
+        else:
+            embed.add_field(name = ':calendar: ' + 'Fecha de inicio', value = _fecha_inicio, inline = True)
+            embed.add_field(name = ':calendar: ' + 'Fecha de término', value = _fecha_fin, inline = True)
+        
+        # Si no es el ultimo torneo, agregar un separador
+        if torneos.index(torneo) != len(torneos) - 1:
+            embed.add_field(name = '', value = '\u200b', inline = False)
+
+    await ctx.send(embed = embed)
 
 if __name__ == '__main__':
     # Iniciar el bot
