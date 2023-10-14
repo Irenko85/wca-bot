@@ -11,6 +11,8 @@ Este módulo contiene funciones para:
 - Obtener los torneos actuales desde una URL de la WCA.
 - Guardar los torneos en una base de datos PostgreSQL.
 - Verificar si hay torneos nuevos cada 12 horas.
+- Eliminar torneos antiguos de la base de datos.
+- Obtener el país usando la API de la WCA.
 """
 
 # URLs con torneos actuales
@@ -156,6 +158,7 @@ def eliminar_torneo(url: str):
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
+# Función para eliminar torneos antiguos de la base de datos
 def limpiar_base_de_datos():
     try:
         conn = db_conn()
