@@ -75,8 +75,8 @@ async def verificar_torneos_nuevos():
             print('No hay torneos nuevos.')
             return
 
-# Comando !torneos
-@bot.command(name = 'torneos', help = 'Muestra los torneos actuales.')
+# Comando !test
+@bot.command(name = 'test', help = 'Muestra los torneos actuales.')
 async def mostrar_torneos(ctx, pais = 'Chile'):
     # Obtener los torneos actuales de la página de la WCA
     torneos = utils.obtener_torneos(utils.URL, pais)
@@ -106,8 +106,9 @@ async def mostrar_torneos(ctx, pais = 'Chile'):
 async def enviar_logo(ctx):
     await ctx.send('https://i.imgur.com/yscsmKO.jpeg')
 
-@bot.command(name = 'embed-test')
-async def test(ctx, pais = 'Chile'):
+# Comando !torneos [pais] para enviar un mensaje embed con los torneos actuales del país dado
+@bot.command(name = 'torneos', help='Muestra un mensaje con los torneos actuales del país dado.')
+async def torneos(ctx, pais = 'Chile'):
     torneos = utils.obtener_torneos(utils.URL, pais)
     pais = utils.obtener_pais(pais)
     vista = VistaPaginacion()
