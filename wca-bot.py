@@ -104,7 +104,8 @@ async def mostrar_torneos(ctx, pais = 'Chile'):
 # Comando !logo
 @bot.command(name = 'logo', help = 'Envía una imagen con el logo del bot.')
 async def enviar_logo(ctx):
-    await ctx.send('https://i.imgur.com/yscsmKO.jpeg')
+    embed = discord.Embed(title = 'WCA Bot Notifier logo', color = discord.Color.blue())
+    await ctx.send(embed = embed.set_image(url = 'https://i.imgur.com/yscsmKO.jpeg'))
 
 # Comando !torneos [pais] para enviar un mensaje embed con los torneos actuales del país dado
 @bot.command(name = 'torneos', help='Muestra un mensaje con los torneos actuales del país dado.')
