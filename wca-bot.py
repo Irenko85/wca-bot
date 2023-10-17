@@ -134,7 +134,7 @@ class VistaPaginacion(discord.ui.View):
         else:
             self.primera_pagina.disabled = False
             self.anterior.disabled = False
-        if self.pagina_actual == (len(self.torneos) // self.separador):
+        if self.pagina_actual == (len(self.torneos) // self.separador) + 1:
             self.ultima_pagina.disabled = True
             self.siguiente.disabled = True
         else:
@@ -170,10 +170,12 @@ class VistaPaginacion(discord.ui.View):
             # Si no es el ultimo torneo, agregar un separador
             if torneos.index(torneo) != len(torneos) - 1:
                 embed.add_field(name = '', value = '\u200b', inline = False)
+        
         if (len(self.torneos) <= 3):
             total_paginas = 1
         else:
-            total_paginas = len(self.torneos) // self.separador
+            total_paginas = (len(self.torneos) // self.separador) + 1
+        
         embed.add_field(name = '\u200b', value = f'**Página {self.pagina_actual} de {total_paginas}**', inline = False)
         
         return embed
@@ -207,7 +209,7 @@ class VistaPaginacion(discord.ui.View):
     @discord.ui.button(label = 'Última', style = discord.ButtonStyle.green, emoji='⏭️')
     async def ultima_pagina(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer()
-        self.pagina_actual = (len(self.torneos) // self.separador)
+        self.pagina_actual = (len(self.torneos) // self.separador) + 1
         hasta = self.pagina_actual * self.separador
         desde = hasta - self.separador
         await self.actualizar_msg_torneos(self.torneos[desde:])
