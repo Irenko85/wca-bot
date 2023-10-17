@@ -113,32 +113,95 @@ async def enviar_logo(ctx):
 @bot.command(name = 'embed-test')
 async def test(ctx, pais = 'Chile'):
     torneos = utils.obtener_torneos(utils.URL, pais)
-    pais = utils.obtener_pais(pais)
-    embed = discord.Embed(title = f':trophy: {ctx.author}, estos son los torneos actuales en {pais} :trophy:', color = discord.Color.blue())
-    embed.set_footer(text = 'WCA Notifier Bot', icon_url = 'https://i.imgur.com/yscsmKO.jpeg')
+    vista = VistaPaginacion()
+    vista.torneos = torneos
+    await vista.enviar(ctx)
 
-    if not torneos:
-        embed.title = f':cry: No se han encontrado torneos en {pais} :cry:'
-        await ctx.send(embed = embed)
-        return
-    for torneo in torneos:
-        # Formatear las fechas para que sean mas legibles
-        _fecha_inicio = torneo['Fecha inicio'].strftime('%d/%m/%Y')
-        _fecha_fin = torneo['Fecha fin'].strftime('%d/%m/%Y')
+class VistaPaginacion(discord.ui.View):
+    pagina_actual = 1
+    separador = 3
 
-        embed.add_field(name = f'{torneos.index(torneo) + 1}. ' + torneo['Nombre torneo'], value = torneo['URL'], inline = False)
-        embed.add_field(name = ':world_map: ' + 'Lugar', value = torneo['Lugar'], inline = True)
-        if torneo['Fecha inicio'] == torneo['Fecha fin']:
-            embed.add_field(name = ':calendar: ' + 'Fecha', value = _fecha_inicio, inline = True)
+    async def enviar(self, ctx):
+        self.message = await ctx.send(view = self)
+        await self.actualizar_msg_torneos(self.torneos[:self.separador])
+
+    def actualizar_botones(self):
+        if self.pagina_actual == 1:
+            self.primera_pagina.disabled = True
+            self.anterior.disabled = True
         else:
-            embed.add_field(name = ':calendar: ' + 'Fecha de inicio', value = _fecha_inicio, inline = True)
-            embed.add_field(name = ':calendar: ' + 'Fecha de término', value = _fecha_fin, inline = True)
-        
-        # Si no es el ultimo torneo, agregar un separador
-        if torneos.index(torneo) != len(torneos) - 1:
-            embed.add_field(name = '', value = '\u200b', inline = False)
+            self.primera_pagina.disabled = False
+            self.anterior.disabled = False
+        if self.pagina_actual == (len(self.torneos) // self.separador):
+            self.ultima_pagina.disabled = True
+            self.siguiente.disabled = True
+        else:
+            self.ultima_pagina.disabled = False
+            self.siguiente.disabled = False
 
-    await ctx.send(embed = embed)
+    def crear_embed_torneo(self, torneos):
+        pais = utils.obtener_pais(torneos[0]['Pais'])
+        embed = discord.Embed(title = f':trophy: Estos son los torneos actuales en {pais} :trophy:', color = discord.Color.blue())
+        embed.set_footer(text = 'WCA Notifier Bot', icon_url = 'https://i.imgur.com/yscsmKO.jpeg')
+        for torneo in torneos:
+            # Formatear las fechas para que sean mas legibles
+            _fecha_inicio = torneo['Fecha inicio'].strftime('%d/%m/%Y')
+            _fecha_fin = torneo['Fecha fin'].strftime('%d/%m/%Y')
+
+            embed.add_field(name = torneo['Nombre torneo'], value = torneo['URL'], inline = False)
+            embed.add_field(name = ':world_map: ' + 'Lugar', value = torneo['Lugar'], inline = True)
+            if torneo['Fecha inicio'] == torneo['Fecha fin']:
+                embed.add_field(name = ':calendar: ' + 'Fecha', value = _fecha_inicio, inline = True)
+            else:
+                embed.add_field(name = ':calendar: ' + 'Fecha de inicio', value = _fecha_inicio, inline = True)
+                embed.add_field(name = ':calendar: ' + 'Fecha de término', value = _fecha_fin, inline = True)
+            
+            # Si no es el ultimo torneo, agregar un separador
+            if torneos.index(torneo) != len(torneos) - 1:
+                embed.add_field(name = '', value = '\u200b', inline = False)
+        if (len(self.torneos) <= 3):
+            total_paginas = 1
+        else:
+            total_paginas = len(self.torneos) // self.separador
+        embed.add_field(name = '\u200b', value = f'**Página {self.pagina_actual} de {total_paginas}**', inline = False)
+        
+        return embed
+    
+    async def actualizar_msg_torneos(self, torneos):
+        self.actualizar_botones()
+        await self.message.edit(embed = self.crear_embed_torneo(torneos), view = self)
+    
+    @discord.ui.button(label = 'Primera', style = discord.ButtonStyle.green, emoji='⏮️')
+    async def primera_pagina(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        self.pagina_actual = 1
+        await self.actualizar_msg_torneos(self.torneos[:self.separador])
+
+    @discord.ui.button(label = 'Anterior', style = discord.ButtonStyle.primary, emoji='⬅️')
+    async def anterior(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        self.pagina_actual -= 1
+        hasta = self.pagina_actual * self.separador
+        desde = hasta - self.separador
+        await self.actualizar_msg_torneos(self.torneos[desde:hasta])
+
+    @discord.ui.button(label = 'Siguiente', style = discord.ButtonStyle.primary, emoji='➡️')
+    async def siguiente(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        self.pagina_actual += 1
+        hasta = self.pagina_actual * self.separador
+        desde = hasta - self.separador
+        await self.actualizar_msg_torneos(self.torneos[desde:hasta])
+
+    @discord.ui.button(label = 'Última', style = discord.ButtonStyle.green, emoji='⏭️')
+    async def ultima_pagina(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await interaction.response.defer()
+        self.pagina_actual = (len(self.torneos) // self.separador)
+        hasta = self.pagina_actual * self.separador
+        desde = hasta - self.separador
+        await self.actualizar_msg_torneos(self.torneos[desde:])
+
+# TODO: arreglar indices de paginacion, hay casos que no se muestran todos los torneos que deberian
 
 if __name__ == '__main__':
     # Iniciar el bot
