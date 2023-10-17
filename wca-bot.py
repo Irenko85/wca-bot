@@ -96,10 +96,6 @@ async def mostrar_torneos(ctx, pais = 'Chile'):
             mensaje += f'**Lugar:** {torneo["Lugar"]}\n'
             mensaje += f'**URL:** {torneo["URL"]}\n\n'
 
-        # Enviar mensaje al usuario que ejecutó el comando
-        # user = ctx.author
-        # await user.send(mensaje)
-
         # Enviar mensaje al canal de Discord
         await ctx.send(mensaje)
     else:
@@ -120,13 +116,17 @@ async def test(ctx, pais = 'Chile'):
     await vista.enviar(ctx)
 
 class VistaPaginacion(discord.ui.View):
+    # Empezar en la primera pagina
     pagina_actual = 1
+    # Cada página tendrá 3 torneos visibles
     separador = 3
 
+    # Función para enviar el mensaje embed con los torneos
     async def enviar(self, ctx):
         self.message = await ctx.send(view = self)
         await self.actualizar_msg_torneos(self.torneos[:self.separador])
 
+    # Función para habilitar/deshabilitar botones en casos bordes de paginación
     def actualizar_botones(self):
         if self.pagina_actual == 1:
             self.primera_pagina.disabled = True
@@ -146,14 +146,19 @@ class VistaPaginacion(discord.ui.View):
             self.ultima_pagina.disabled = True
             self.siguiente.disabled = True
 
+    # Función para crear el mensaje embed con los torneos
     def crear_embed_torneo(self, torneos):
+        # Crear el mensaje embed
         embed = discord.Embed(title = f':trophy: Estos son los torneos actuales en {self.pais} :trophy:', color = discord.Color.blue())
+        # Agregar el footer
         embed.set_footer(text = 'WCA Notifier Bot', icon_url = 'https://i.imgur.com/yscsmKO.jpeg')
 
+        # Caso en el que no se encuentren torneos
         if not torneos:
             embed.add_field(name = 'No se han encontrado torneos.', value = '\u200b', inline = False)
             return embed
 
+        # Caso en el que sí hay torneos
         for torneo in torneos:
             # Formatear las fechas para que sean mas legibles
             _fecha_inicio = torneo['Fecha inicio'].strftime('%d/%m/%Y')
@@ -161,8 +166,12 @@ class VistaPaginacion(discord.ui.View):
 
             embed.add_field(name = torneo['Nombre torneo'], value = torneo['URL'], inline = False)
             embed.add_field(name = ':world_map: ' + 'Lugar', value = torneo['Lugar'], inline = True)
+            
+            # Si la fecha de inicio y fin son iguales, el torneo dura solo un día
             if torneo['Fecha inicio'] == torneo['Fecha fin']:
                 embed.add_field(name = ':calendar: ' + 'Fecha', value = _fecha_inicio, inline = True)
+
+            # En otro caso, el torneo dura más de un día y se agrega al mensaje la fecha de inicio y fecha de término
             else:
                 embed.add_field(name = ':calendar: ' + 'Fecha de inicio', value = _fecha_inicio, inline = True)
                 embed.add_field(name = ':calendar: ' + 'Fecha de término', value = _fecha_fin, inline = True)
@@ -171,26 +180,31 @@ class VistaPaginacion(discord.ui.View):
             if torneos.index(torneo) != len(torneos) - 1:
                 embed.add_field(name = '', value = '\u200b', inline = False)
         
+        # En caso de tener menos de 3 torneos, actualizar el total de páginas
         if (len(self.torneos) <= 3):
             total_paginas = 1
         else:
             total_paginas = (len(self.torneos) // self.separador) + 1
         
+        # Número de página actual de un total de páginas
         embed.add_field(name = '\u200b', value = f'**Página {self.pagina_actual} de {total_paginas}**', inline = False)
         
         return embed
     
+    # Función para actualizar el mensaje embed una vez se interactúa con un botón
     async def actualizar_msg_torneos(self, torneos):
         self.actualizar_botones()
         await self.message.edit(embed = self.crear_embed_torneo(torneos), view = self)
     
-    @discord.ui.button(label = 'Primera', style = discord.ButtonStyle.green, emoji='⏮️')
+    # Botón que te lleva a la primera página
+    @discord.ui.button(label = 'Primera', style = discord.ButtonStyle.primary, emoji='⏮️')
     async def primera_pagina(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer()
         self.pagina_actual = 1
         await self.actualizar_msg_torneos(self.torneos[:self.separador])
 
-    @discord.ui.button(label = 'Anterior', style = discord.ButtonStyle.primary, emoji='⬅️')
+    # Botón que te lleva a la página anterior
+    @discord.ui.button(label = 'Anterior', style = discord.ButtonStyle.green, emoji='⬅️')
     async def anterior(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer()
         self.pagina_actual -= 1
@@ -198,7 +212,8 @@ class VistaPaginacion(discord.ui.View):
         desde = hasta - self.separador
         await self.actualizar_msg_torneos(self.torneos[desde:hasta])
 
-    @discord.ui.button(label = 'Siguiente', style = discord.ButtonStyle.primary, emoji='➡️')
+    # Botón que te lleva a la página siguiente
+    @discord.ui.button(label = 'Siguiente', style = discord.ButtonStyle.green, emoji='➡️')
     async def siguiente(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer()
         self.pagina_actual += 1
@@ -206,15 +221,14 @@ class VistaPaginacion(discord.ui.View):
         desde = hasta - self.separador
         await self.actualizar_msg_torneos(self.torneos[desde:hasta])
 
-    @discord.ui.button(label = 'Última', style = discord.ButtonStyle.green, emoji='⏭️')
+    # Botón que te lleva a la última página
+    @discord.ui.button(label = 'Última', style = discord.ButtonStyle.primary, emoji='⏭️')
     async def ultima_pagina(self, interaction: discord.Interaction, button: discord.ui.Button):
         await interaction.response.defer()
         self.pagina_actual = (len(self.torneos) // self.separador) + 1
         hasta = self.pagina_actual * self.separador
         desde = hasta - self.separador
         await self.actualizar_msg_torneos(self.torneos[desde:])
-
-# TODO: arreglar indices de paginacion, hay casos que no se muestran todos los torneos que deberian
 
 if __name__ == '__main__':
     # Iniciar el bot
