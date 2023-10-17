@@ -113,8 +113,10 @@ async def enviar_logo(ctx):
 @bot.command(name = 'embed-test')
 async def test(ctx, pais = 'Chile'):
     torneos = utils.obtener_torneos(utils.URL, pais)
+    pais = utils.obtener_pais(pais)
     vista = VistaPaginacion()
     vista.torneos = torneos
+    vista.pais = pais
     await vista.enviar(ctx)
 
 class VistaPaginacion(discord.ui.View):
@@ -138,11 +140,20 @@ class VistaPaginacion(discord.ui.View):
         else:
             self.ultima_pagina.disabled = False
             self.siguiente.disabled = False
+        if (len(self.torneos) <= 3):
+            self.primera_pagina.disabled = True
+            self.anterior.disabled = True
+            self.ultima_pagina.disabled = True
+            self.siguiente.disabled = True
 
     def crear_embed_torneo(self, torneos):
-        pais = utils.obtener_pais(torneos[0]['Pais'])
-        embed = discord.Embed(title = f':trophy: Estos son los torneos actuales en {pais} :trophy:', color = discord.Color.blue())
+        embed = discord.Embed(title = f':trophy: Estos son los torneos actuales en {self.pais} :trophy:', color = discord.Color.blue())
         embed.set_footer(text = 'WCA Notifier Bot', icon_url = 'https://i.imgur.com/yscsmKO.jpeg')
+
+        if not torneos:
+            embed.add_field(name = 'No se han encontrado torneos.', value = '\u200b', inline = False)
+            return embed
+
         for torneo in torneos:
             # Formatear las fechas para que sean mas legibles
             _fecha_inicio = torneo['Fecha inicio'].strftime('%d/%m/%Y')
