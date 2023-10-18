@@ -11,7 +11,7 @@ load_dotenv()  # Cargar variables de entorno
 Este módulo contiene el código principal del bot de Discord.
 Posee los siguientes comandos y funciones:
     - verificar_torneos_nuevos: Verifica si hay torneos nuevos cada 12 horas y envía una notificación al canal #torneos en caso de encontrar nuevos torneos.
-    - !torneos: Muestra los torneos actuales.
+    - !torneos [pais]: Envía un mensaje embed con los torneos actuales del país dado, en caso de no especificar un país, se muestran los torneos de Chile.
     - !logo: Envía una imagen con el logo del bot.
 """
 
@@ -34,6 +34,7 @@ async def on_ready():
     verificar_torneos_nuevos.start()  # Iniciar la tarea de verificación de torneos nuevos después de iniciar el bot
 
 # Función para verificar si hay torneos nuevos cada 12 horas
+# TODO: Cambiar el mensaje de notificación a un mensaje embed
 @tasks.loop(hours = 12)
 async def verificar_torneos_nuevos():
     # Obtener el canal de Discord
