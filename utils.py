@@ -69,7 +69,7 @@ def cargar_torneos_conocidos():
 
 # Función para obtener los torneos desde la URL y retornar una lista de diccionarios con los torneos encontrados
 # obtener_torneos(url: str) -> list
-def obtener_torneos(url, pais = 'Chile'):
+def obtener_torneos(url, pais='Chile'):
     try:
         pais = obtener_pais_para_url(pais)
         url = url.replace('Chile', pais)
