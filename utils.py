@@ -13,6 +13,7 @@ Este módulo contiene funciones para:
 - Guardar los torneos en una base de datos PostgreSQL.
 - Eliminar torneos antiguos de la base de datos.
 - Obtener el país usando la API de la WCA.
+- Validar el país ingresado por el usuario.
 """
 
 # URLs con torneos actuales
@@ -171,14 +172,18 @@ def limpiar_base_de_datos():
     except (Exception, psycopg2.DatabaseError) as error:
         print(error)
 
-# Función para obtener el país usando la API de la WCA y retornar el nombre del país con formato de URL
-def obtener_pais_para_url(pais):
+# Función para obtener los países desde la API de la WCA
+def api_paises():
     API = 'https://raw.githubusercontent.com/robiningelbrecht/wca-rest-api/master/api/countries.json'
     respuesta = requests.get(API)
     respuesta.raise_for_status() # Genera una excepción si la solicitud no es exitosa
     paises = respuesta.json()
 
-    # IDEA: Traducir el nombre del país al inglés para buscarlo en la API, así se aceptan nombres en español u otro idioma
+    return paises
+
+# Función para retornar el nombre del país con formato de URL
+def obtener_pais_para_url(pais):
+    paises = api_paises()
 
     # Listas con los nombres y códigos de los países
     nombres_paises = [p['name'].lower() for p in paises['items']]
@@ -210,3 +215,19 @@ def obtener_pais_para_url(pais):
 # Función para obtener el nombre del país con formato de título
 def obtener_pais(pais):
     return obtener_pais_para_url(pais).title().replace('+', ' ')
+
+def validar_pais(pais):
+    paises = api_paises()
+    nombres_paises = [p['name'].lower() for p in paises['items']]
+    codigos_paises = [p['iso2Code'].lower() for p in paises['items']]
+    pais = obtener_pais(pais)
+    print(pais)
+    es_valido = False
+    if pais in nombres_paises or pais in codigos_paises:
+        es_valido = True
+    else:
+        sugerencias = difflib.get_close_matches(pais, nombres_paises, n=1, cutoff=0.8)
+        if sugerencias:
+            pais = nombres_paises[nombres_paises.index(sugerencias[0])]
+            es_valido = True
+    return es_valido
