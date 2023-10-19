@@ -9,8 +9,8 @@ import difflib
 """
 Este módulo contiene funciones para:
 - Obtener los torneos actuales desde una URL de la WCA.
+- Obtener los torneos guardados en la base de datos.
 - Guardar los torneos en una base de datos PostgreSQL.
-- Verificar si hay torneos nuevos cada 12 horas.
 - Eliminar torneos antiguos de la base de datos.
 - Obtener el país usando la API de la WCA.
 """
