@@ -83,7 +83,7 @@ async def verificar_torneos_nuevos():
 
 # Comando !test
 @bot.command(name='test', help='Muestra los torneos actuales.')
-async def mostrar_torneos(ctx, pais=utils.pais_default):
+async def mostrar_torneos(ctx, pais='Chile'):
     # Obtener los torneos actuales de la página de la WCA
     torneos = utils.obtener_torneos(utils.URL, pais)
 
