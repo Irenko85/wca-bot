@@ -5,6 +5,7 @@ import os
 from dotenv import load_dotenv
 from datetime import datetime
 import difflib
+from googletrans import Translator
 
 """
 Este módulo contiene funciones para:
@@ -231,3 +232,8 @@ def validar_pais(pais):
             pais = nombres_paises[nombres_paises.index(sugerencias[0])]
             es_valido = True
     return es_valido
+
+def traducir_texto(idioma_output, texto):
+    traductor = Translator()
+    res = traductor.translate(texto, dest=idioma_output).text
+    return res
