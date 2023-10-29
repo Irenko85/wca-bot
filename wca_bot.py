@@ -83,6 +83,7 @@ async def set_language(ctx, idioma):
     Retorna:
         - None
     '''
+    # TODO: Validar idioma
     # if not utils.validar_idioma(idioma):
     #     await ctx.send('El idioma ingresado no es válido.')
     #     return
