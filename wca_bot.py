@@ -1,12 +1,3 @@
-import discord
-from discord.ext import commands, tasks
-import os
-from datetime import datetime
-from dotenv import load_dotenv
-import utils as utils
-
-load_dotenv()  # Cargar variables de entorno
-
 """
 Este módulo contiene el código principal del bot de Discord.
 Posee los siguientes comandos y funciones:
@@ -15,40 +6,114 @@ Posee los siguientes comandos y funciones:
     - !logo: Envía una imagen con el logo del bot.
 """
 
+
+import json
+import discord
+from discord.ext import commands, tasks
+import os
+from datetime import datetime
+from dotenv import load_dotenv
+import utils as utils
+
+
+load_dotenv()  # Cargar variables de entorno
+
+
 TOKEN = os.getenv('TOKEN') # Token del bot
 GUILD_ID = os.getenv('GUILD_ID')  # ID del servidor de Discord
 CHANNEL_ID = os.getenv('CHANNEL_ID')  # ID del canal de Discord
+ALIASES = json.load(open('./json/command_aliases.json', 'r', encoding='utf-8')) # Aliases de los comandos
+
 
 # Definir los intents requeridos
 intents = discord.Intents.default()
 intents.messages = True
 intents.message_content = True
 
-# Crear una instancia del bot con el prefijo ! para comandos y los intents definidos
-bot = commands.Bot(command_prefix='!', intents=intents)
 
-# Función ejecutada al iniciar el bot
+class WCABot(commands.Bot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.pais_por_defecto = 'Chile'
+        self.idioma = 'es'
+
+
+# Crear una instancia del bot con el prefijo ! para comandos y los intents definidos
+bot = WCABot(command_prefix='!', intents=intents)
+
+
 @bot.event
 async def on_ready():
     print(f'Bot iniciado correctamente. Conectado como {bot.user.name}')
     verificar_torneos_nuevos.start()  # Iniciar la tarea de verificación de torneos nuevos después de iniciar el bot
 
-# Función para settear el país por defecto para uso del bot
-@bot.command(name='set-country', help='Settea el país por defecto. Ejemplo: !set-country Chile')
-async def set_country(ctx, pais):
-    if not pais:
-        await ctx.send('No se ha ingresado ningún país.')
-        return
-    if not utils.validar_pais(pais):
-        await ctx.send('El país ingresado no es válido.')
-        return
-    pais = pais.lower().capitalize()
-    utils.pais_default = pais
-    await ctx.send(f'Se ha cambiado el país por defecto a {utils.pais_default}.')
 
-# Función para verificar si hay torneos nuevos cada 12 horas
+@bot.command(name='cambiar-pais', help='Settea el país por defecto. Ejemplo: !cambiar-pais Chile', aliases=ALIASES["cambiar-pais"])
+async def set_country(ctx, *args):
+    '''
+    Comando para settear el país por defecto para uso del bot.
+
+    Parámetros:
+        - ctx: Contexto del comando.
+        - pais: País a settear como país default.
+    
+    Retorna:
+        - None
+    '''
+    pais = ' '.join(args)
+
+    if not utils.validar_pais(pais) or not pais:
+        await ctx.send(f'{utils.traducir(bot.idioma, "InvalidCountry")}')
+        return
+    pais = utils.obtener_pais(pais)
+    bot.pais_por_defecto = pais
+    print(f'País por defecto setteado a {pais}.')
+    await ctx.send(f'{utils.traducir(bot.idioma, "SetCountry")} {pais}.')
+
+
+@bot.command(name='cambiar-idioma', help='Settea el idioma del bot. Ejemplo: !cambiar-idioma en_US', aliases=ALIASES["cambiar-idioma"])
+async def set_language(ctx, idioma):
+    '''
+    Comando para settear el idioma del bot.
+
+    Parámetros:
+        - ctx: Contexto del comando.
+        - idioma: Idioma a settear.
+    
+    Retorna:
+        - None
+    '''
+    # if not utils.validar_idioma(idioma):
+    #     await ctx.send('El idioma ingresado no es válido.')
+    #     return
+    bot.idioma = idioma
+    await ctx.send(f'{utils.traducir(bot.idioma, "SetLanguage")}')
+
+
+@bot.command(name='idiomas', help='Muestra los idiomas disponibles.', aliases=ALIASES["idiomas"])
+async def languages(ctx):
+    '''
+    Comando para mostrar los idiomas disponibles.
+
+    Parámetros:
+        - ctx: Contexto del comando.
+    
+    Retorna:
+        - None
+    '''
+    embed = discord.Embed(title=f'{utils.traducir(bot.idioma, "AvailableLanguages")}', color=discord.Color.random())
+
+    # TODO: Agregar los idiomas disponibles
+    # for idioma in utils.IDIOMAS:
+    #     embed.add_field(name=idioma["idioma"], value=idioma["codigo"], inline=False)
+    await ctx.send(embed=embed)
+
+
 @tasks.loop(hours=12)
 async def verificar_torneos_nuevos():
+    '''
+    Función para verificar si hay torneos nuevos cada 12 horas.
+    '''
     # Obtener el canal de Discord
     canal = bot.get_channel(int(CHANNEL_ID))
     utils.limpiar_base_de_datos()
@@ -56,7 +121,7 @@ async def verificar_torneos_nuevos():
     if canal:
         print("Verificando torneos nuevos...")
         # Obtener los torneos actuales
-        torneos_actuales = utils.obtener_torneos(utils.URL)
+        torneos_actuales = utils.obtener_torneos(utils.URL, bot.pais_por_defecto)
 
         # Cargar los torneos ya guardados
         torneos_conocidos = utils.cargar_torneos_conocidos()
@@ -81,46 +146,77 @@ async def verificar_torneos_nuevos():
             print('No hay torneos nuevos.')
             return
 
+
 # Comando !test
 @bot.command(name='test', help='Muestra los torneos actuales.')
-async def mostrar_torneos(ctx, pais='Chile'):
+async def mostrar_torneos(ctx, pais=bot.pais_por_defecto):
+    '''
+    Función para mostrar los torneos actuales usando el comando !test.
+
+    Parámetros:
+        - ctx: Contexto del comando.
+        - pais: País del que se quieren mostrar los torneos. Por defecto es el país default del bot.
+
+    Retorna:
+        - None
+    '''
+
     # Obtener los torneos actuales de la página de la WCA
     torneos = utils.obtener_torneos(utils.URL, pais)
 
     # Si hay torneos existentes, enviar mensaje con los torneos
     if len(torneos) > 0:
         _pais = utils.obtener_pais(pais)
-        mensaje = f'**{ctx.author.mention}, estos son los torneos actuales en {_pais} :eyes: :trophy::**\n\n'
+        mensaje = f'**{ctx.author.mention}, {utils.traducir(bot.idioma, "CurrentCompetitions")} {_pais} :eyes: :trophy::**\n\n'
         for torneo in torneos:
             mensaje += f'**{torneos.index(torneo) + 1}.**\n'
-            mensaje += f'**Nombre:** {torneo["Nombre torneo"]}\n'
+            mensaje += f'**{utils.traducir(bot.idioma, "Name")}** {torneo["Nombre torneo"]}\n'
             if torneo["Fecha inicio"] == torneo["Fecha fin"]:
-                mensaje += f'**Fecha:** {torneo["Fecha inicio"]}\n'
+                mensaje += f'**{utils.traducir(bot.idioma, "Date")}** {torneo["Fecha inicio"]}\n'
             else:
-                mensaje += f'**Fecha de inicio:** {torneo["Fecha inicio"]}\n'
-                mensaje += f'**Fecha de término:** {torneo["Fecha fin"]}\n'
-            mensaje += f'**Lugar:** {torneo["Lugar"]}\n'
+                mensaje += f'**{utils.traducir(bot.idioma, "StartDate")}** {torneo["Fecha inicio"]}\n'
+                mensaje += f'**{utils.traducir(bot.idioma, "EndDate")}** {torneo["Fecha fin"]}\n'
+            mensaje += f'**{utils.traducir(bot.idioma, "Location")}** {torneo["Lugar"]}\n'
             mensaje += f'**URL:** {torneo["URL"]}\n\n'
 
         # Enviar mensaje al canal de Discord
         await ctx.send(mensaje)
     else:
-        await ctx.send('No se han encontrado torneos.')
+        await ctx.send(f'{utils.traducir(bot.idioma, "NoCompetitionFound")}')
 
-# Comando !logo
-@bot.command(name='logo', help='Envía una imagen con el logo del bot.')
+
+@bot.command(name='logo', help='Envía una imagen con el logo del bot.', aliases=ALIASES["logo"])
 async def enviar_logo(ctx):
+    '''
+    Comando !logo para enviar una imagen con el logo del bot.
+    '''
     embed = discord.Embed(title='WCA Bot Notifier logo', color=discord.Color.blue())
     await ctx.send(embed=embed.set_image(url='https://i.imgur.com/yscsmKO.jpeg'))
 
-# Comando !torneos [pais] para enviar un mensaje embed con los torneos actuales del país dado
-@bot.command(name='torneos', help='Muestra un mensaje con los torneos actuales del país dado.')
-async def torneos(ctx, pais='Chile'):
+
+@bot.command(name='torneos', help='Muestra un mensaje con los torneos actuales del país dado.', aliases=ALIASES["torneos"])
+async def torneos(ctx, *args):
+    '''
+    Comando !torneos [pais] para enviar un mensaje embed con los torneos actuales del país dado.
+
+    Parámetros:
+        - ctx: Contexto del comando.
+        - pais: País del que se quieren mostrar los torneos. Por defecto es el país default del bot.
+
+    Ejemplo:
+        - !torneos Chile
+        - !torneos cl
+        - !torneos (cuando no se especifica un país, se muestran los torneos de Chile)
+    '''
+    pais = ' '.join(args)
+    if not pais:
+        pais = bot.pais_por_defecto
     torneos = utils.obtener_torneos(utils.URL, pais)
     pais = utils.obtener_pais(pais)
     vista = VistaPaginacion()
     vista.torneos = torneos
     vista.pais = pais
+    vista.traducir_botones()
     await vista.enviar(ctx)
 
 class VistaPaginacion(discord.ui.View):
@@ -128,6 +224,13 @@ class VistaPaginacion(discord.ui.View):
     pagina_actual = 1
     # Cada página tendrá 3 torneos visibles
     separador = 3
+
+    def traducir_botones(self):
+        # Traduce las etiquetas de los botones
+        self.primera_pagina.label = utils.traducir(bot.idioma, "First")
+        self.anterior.label = utils.traducir(bot.idioma, "Previous")
+        self.siguiente.label = utils.traducir(bot.idioma, "Next")
+        self.ultima_pagina.label = utils.traducir(bot.idioma, "Last")
 
     # Función para enviar el mensaje embed con los torneos cuando se usa el comando !torneos
     async def enviar(self, ctx):
@@ -161,13 +264,13 @@ class VistaPaginacion(discord.ui.View):
     # Función para crear el mensaje embed con los torneos
     def crear_embed_torneo(self, torneos):
         # Crear el mensaje embed
-        embed = discord.Embed(title=f':trophy: Estos son los torneos actuales en {self.pais} :trophy:', color=discord.Color.blue())
+        embed = discord.Embed(title=f':trophy: {utils.traducir(bot.idioma, "CurrentCompetitions")} {self.pais} :trophy:', color=discord.Color.blue())
         # Agregar el footer
         embed.set_footer(text='WCA Notifier Bot', icon_url='https://i.imgur.com/yscsmKO.jpeg')
 
         # Caso en el que no se encuentren torneos
         if not torneos:
-            embed.add_field(name='No se han encontrado torneos.', value='\u200b', inline=False)
+            embed.add_field(name=f'{utils.traducir(bot.idioma, "NoCompetitionFound")}', value='\u200b', inline=False)
             return embed
 
         # Caso en el que sí hay torneos
@@ -177,16 +280,16 @@ class VistaPaginacion(discord.ui.View):
             _fecha_fin = torneo['Fecha fin'].strftime('%d/%m/%Y')
 
             embed.add_field(name=torneo['Nombre torneo'], value=torneo['URL'], inline=False)
-            embed.add_field(name=':world_map: ' + 'Lugar', value=torneo['Lugar'], inline=True)
+            embed.add_field(name=':world_map: ' + f'{utils.traducir(bot.idioma, "Location")}', value=torneo['Lugar'], inline=True)
             
             # Si la fecha de inicio y fin son iguales, el torneo dura solo un día
             if torneo['Fecha inicio'] == torneo['Fecha fin']:
-                embed.add_field(name=':calendar: ' + 'Fecha', value=_fecha_inicio, inline=True)
+                embed.add_field(name=':calendar: ' + f'{utils.traducir(bot.idioma, "Date")}', value=_fecha_inicio, inline=True)
 
             # En otro caso, el torneo dura más de un día y se agrega al mensaje la fecha de inicio y fecha de término
             else:
-                embed.add_field(name=':calendar: ' + 'Fecha de inicio', value=_fecha_inicio, inline=True)
-                embed.add_field(name=':calendar: ' + 'Fecha de término', value=_fecha_fin, inline=True)
+                embed.add_field(name=':calendar: ' + f'{utils.traducir(bot.idioma, "StartDate")}', value=_fecha_inicio, inline=True)
+                embed.add_field(name=':calendar: ' + f'{utils.traducir(bot.idioma, "EndDate")}', value=_fecha_fin, inline=True)
             
             # Si no es el ultimo torneo, agregar un separador
             if torneos.index(torneo) != len(torneos) - 1:
