@@ -1,0 +1,20 @@
+{
+    "WelcomeMessage": "Bienvenid@ al server del bot WCA Notifier",
+    "NewCompetitions": "se han encontrado nuevos torneos!",
+    "NoCompetitionFound": "No se han encontrado competencias.",
+    "CurrentCompetitions": "Estas son las competencias actuales en",
+    "Name": "Nombre:",
+    "StartDate": "Fecha de inicio:",
+    "EndDate": "Fecha de término:",
+    "Date": "Fecha:",
+    "Country": "País:",
+    "Location": "Lugar:",
+    "SetLanguage": "Se ha cambiado el idioma del bot a español.",
+    "SetCountry": "Se ha cambiado el país por defecto a",
+    "InvalidCountry": "No se ha ingresado un país válido.",
+    "First": "Primera",
+    "Previous": "Anterior",
+    "Next": "Siguiente",
+    "Last": "Última",
+    "AvailableLanguages": "Estos son los idiomas disponibles:"
+}
