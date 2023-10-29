@@ -71,7 +71,7 @@ async def set_country(ctx, *args):
     await ctx.send(f'{utils.traducir(bot.idioma, "SetCountry")} {pais}.')
 
 
-@bot.command(name='cambiar-idioma', help='Settea el idioma del bot. Ejemplo: !cambiar-idioma en_US', aliases=ALIASES["cambiar-idioma"])
+@bot.command(name='cambiar-idioma', help='Settea el idioma del bot. Ejemplo: !cambiar-idioma en', aliases=ALIASES["cambiar-idioma"])
 async def set_language(ctx, idioma):
     '''
     Comando para settear el idioma del bot.
