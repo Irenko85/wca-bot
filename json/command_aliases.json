@@ -1,0 +1,20 @@
+{
+    "torneos": [
+      "competencias",
+      "torunaments",
+      "competitions",
+      "open"
+    ],
+    "logo": [
+      "picture"
+    ],
+    "cambiar-idioma": [
+      "set-language"
+    ],
+    "cambiar-pais": [
+      "set-country"
+    ],
+    "idiomas": [
+        "languages"
+    ]
+}
