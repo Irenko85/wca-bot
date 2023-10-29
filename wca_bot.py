@@ -219,6 +219,7 @@ async def torneos(ctx, *args):
     vista.traducir_botones()
     await vista.enviar(ctx)
 
+
 class VistaPaginacion(discord.ui.View):
     # Empezar en la primera pagina
     pagina_actual = 1
@@ -371,6 +372,7 @@ class VistaPaginacion(discord.ui.View):
         hasta = self.pagina_actual * self.separador
         desde = hasta - self.separador
         await self.actualizar_msg_torneos(self.torneos[desde:])
+
 
 if __name__ == '__main__':
     # Iniciar el bot
