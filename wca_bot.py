@@ -135,7 +135,7 @@ async def verificar_torneos_nuevos():
             # Enviar mensaje al canal de Discord
             vista = VistaPaginacion()
             vista.torneos = torneos_nuevos
-            mencion = ':tada: **¡@everyone, se han encontrado nuevos torneos!** :tada:\n\n'
+            mencion = f':tada: **¡@everyone, {utils.traducir(bot.idioma, "NewCompetitions")}** :tada:\n\n'
             embeds_nuevos_torneos = vista.crear_embed_notificacion(torneos_nuevos)
             await canal.send(mencion, embeds=embeds_nuevos_torneos)
 
@@ -328,12 +328,12 @@ class VistaPaginacion(discord.ui.View):
 
             # Agregar los datos del torneo al mensaje embed
             embed.add_field(name=torneo['Nombre torneo'], value=torneo['URL'], inline=False)
-            embed.add_field(name=':world_map: ' + 'Lugar', value=torneo['Lugar'], inline=True)
+            embed.add_field(name=':world_map: ' + f'{utils.traducir(bot.idioma, "Location")}', value=torneo['Lugar'], inline=True)
             if torneo['Fecha inicio'] == torneo['Fecha fin']:
-                embed.add_field(name=':calendar: ' + 'Fecha', value=_fecha_inicio, inline=True)
+                embed.add_field(name=':calendar: ' + f'{utils.traducir(bot.idioma, "Date")}', value=_fecha_inicio, inline=True)
             else:
-                embed.add_field(name=':calendar: ' + 'Fecha de inicio', value=_fecha_inicio, inline=True)
-                embed.add_field(name=':calendar: ' + 'Fecha de término', value=_fecha_fin, inline=True)
+                embed.add_field(name=':calendar: ' + f'{utils.traducir(bot.idioma, "StartDate")}', value=_fecha_inicio, inline=True)
+                embed.add_field(name=':calendar: ' + f'{utils.traducir(bot.idioma, "EndDate")}', value=_fecha_fin, inline=True)
             
             # Agregarlo al arreglo
             embed_torneos.append(embed)
