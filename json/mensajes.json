@@ -1,0 +1,74 @@
+{
+    "WelcomeMessage": {
+        "es": "Bienvenid@ al server del bot WCA Notifier",
+        "en": "Welcome to the WCA Notifier bot server!"
+    },
+    "NewCompetitions": {
+        "es": "se han encontrado nuevos torneos!",
+        "en": "New competitions have been found!"
+    },
+    "NoCompetitionFound": {
+        "es": "No se han encontrado competencias.",
+        "en": "No competitions found."
+    },
+    "CurrentCompetitions": {
+        "es": "Estas son las competencias actuales en",
+        "en": "These are the current competitions in"
+    },
+    "Name": {
+        "es": "Nombre:",
+        "en": "Name:"
+    },
+    "StartDate": {
+        "es": "Fecha de inicio:",
+        "en": "Start date:"
+    },
+    "EndDate": {
+        "es": "Fecha de término:",
+        "en": "End date:"
+    },
+    "Date": {
+        "es": "Fecha:",
+        "en": "Date:"
+    },
+    "Country": {
+        "es": "País:",
+        "en": "Country:"
+    },
+    "Location": {
+        "es": "Lugar:",
+        "en": "Location:"
+    },
+    "SetLanguage": {
+        "es": "Se ha cambiado el idioma del bot a español.",
+        "en": "Bot language has been changed to english."
+    },
+    "SetCountry": {
+        "es": "Se ha cambiado el país por defecto a",
+        "en": "Default country has been changed to"
+    },
+    "InvalidCountry": {
+        "es": "No se ha ingresado un país válido.",
+        "en": "Invalid country entered."
+    },
+    "First": {
+        "es": "Primera",
+        "en": "First"
+    },
+    "Previous": {
+        "es": "Anterior",
+        "en": "Previous"
+    },
+    "Next": {
+        "es": "Siguiente",
+        "en": "Next"
+    },
+    "Last": {
+        "es": "Última",
+        "en": "Last"
+    },
+    "AvailableLanguages": {
+        "es": "Estos son los idiomas disponibles:",
+        "en": "These are the available languages:"
+    }
+}
