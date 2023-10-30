@@ -348,7 +348,7 @@ def validar_pais(pais):
     return es_valido
 
 
-def cargar_traducciones(idioma):
+def cargar_traducciones():
     '''
     Carga las traducciones desde el archivo JSON.
 
@@ -359,11 +359,11 @@ def cargar_traducciones(idioma):
     dict: Traducciones en formato JSON.
     '''
     try:
-        with open(f'./json/{idioma}.json', 'r', encoding='utf-8') as archivo:
+        with open(f'./json/mensajes.json', 'r', encoding='utf-8') as archivo:
             traducciones = json.load(archivo)
             return traducciones
     except FileNotFoundError:
-        print(f'No se ha encontrado el archivo {idioma}.json')
+        print(f'No se ha encontrado el archivo mensajes.json')
         return {}
 
 
@@ -378,8 +378,11 @@ def traducir(idioma, key):
     Retorna:
     str: Texto traducido.
     '''
-    traducciones = cargar_traducciones(idioma)
+    traducciones = cargar_traducciones()
+    # print(traducciones)
     if traducciones and key in traducciones:
-        return traducciones[key]
+        return traducciones[key][idioma]
     else:
         return f'No se ha encontrado la traducción para la llave {key}.'
+    
+print(traducir('es', 'AvailableLanguages'))
