@@ -61,7 +61,6 @@ async def set_country(ctx, *args):
         - None
     '''
     pais = ' '.join(args)
-
     if not utils.validar_pais(pais) or not pais:
         await ctx.send(f'{utils.traducir(bot.idioma, "InvalidCountry")}')
         return

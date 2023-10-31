@@ -308,7 +308,7 @@ def obtener_pais_para_url(pais):
         return nombres_paises[indice].replace(' ', '+')
     
     # Si no se encuentra una sugerencia, retornar Chile
-    print('No se han encontrado coincidencias. Buscando torneos en Chile...')
+    print('No se han encontrado coincidencias. Retornando Chile...')
     return 'Chile'
 
 
@@ -350,7 +350,7 @@ def validar_pais(pais):
     codigos_paises = [p['iso2Code'].lower() for p in paises['items']]
     pais = obtener_pais(pais).lower()
     es_valido = False
-    
+
     # Caso especial para Estados Unidos
     usa = ['united states', 'us', 'usa', 'estados unidos']
     if pais in usa:
