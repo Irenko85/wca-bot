@@ -290,6 +290,11 @@ def obtener_pais_para_url(pais):
 
     pais = pais.lower()
 
+    # Caso especial para Estados Unidos
+    usa = ['united states', 'us', 'usa', 'estados unidos']
+    if pais in usa:
+        return 'USA'
+
     # Si se proporciona el nombre completo del país, retornar el mismo nombre
     if pais in nombres_paises:
         # Se retorna el nombre del país con formato de URL
@@ -324,6 +329,9 @@ def obtener_pais(pais):
     >>> obtener_pais('cl')
     'Chile'
     '''
+    if obtener_pais_para_url(pais) == 'USA':
+        return 'United States'
+    
     return obtener_pais_para_url(pais).title().replace('+', ' ')
 
 
@@ -342,6 +350,12 @@ def validar_pais(pais):
     codigos_paises = [p['iso2Code'].lower() for p in paises['items']]
     pais = obtener_pais(pais).lower()
     es_valido = False
+    
+    # Caso especial para Estados Unidos
+    usa = ['united states', 'us', 'usa', 'estados unidos']
+    if pais in usa:
+        es_valido = True
+
     if pais in nombres_paises or pais in codigos_paises:
         es_valido = True
 
