@@ -385,4 +385,39 @@ def traducir(idioma, key):
     else:
         return f'No se ha encontrado la traducción para la llave {key}.'
     
-print(traducir('es', 'AvailableLanguages'))
+
+def cargar_idiomas():
+    '''
+    Carga los idiomas disponibles desde el archivo mensajes.JSON
+
+    Parámetros:
+    None
+
+    Retorna:
+    dict: Idiomas en formato JSON.
+    '''
+    try:
+        with open(f'./json/mensajes.json', 'r', encoding='utf-8') as archivo:
+            traducciones = json.load(archivo)
+            return traducciones['Languages']
+
+    except FileNotFoundError:
+        print(f'No se ha encontrado el archivo mensajes.json')
+        return []
+
+
+def validar_idioma(idioma):
+    '''
+    Verifica si el idioma ingresado existe en el archivo JSON.
+
+    Parámetros:
+    idioma (str): Idioma de las traducciones.
+
+    Retorna:
+    bool: True si el idioma existe, False en caso contrario.
+    '''
+    es_valido = False
+    idiomas = cargar_idiomas()
+    if idioma in idiomas.keys():
+        es_valido = True
+    return es_valido

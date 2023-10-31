@@ -83,10 +83,9 @@ async def set_language(ctx, idioma):
     Retorna:
         - None
     '''
-    # TODO: Validar idioma
-    # if not utils.validar_idioma(idioma):
-    #     await ctx.send('El idioma ingresado no es válido.')
-    #     return
+    if not utils.validar_idioma(idioma):
+        await ctx.send('El idioma ingresado no es válido.')
+        return
     bot.idioma = idioma
     await ctx.send(f'{utils.traducir(bot.idioma, "SetLanguage")}')
 
@@ -102,11 +101,19 @@ async def languages(ctx):
     Retorna:
         - None
     '''
+    # Crear el mensaje embed
     embed = discord.Embed(title=f'{utils.traducir(bot.idioma, "AvailableLanguages")}', color=discord.Color.random())
+    embed.set_footer(text='WCA Notifier Bot', icon_url='https://i.imgur.com/yscsmKO.jpeg')
+    
+    # Cargar los idiomas disponibles
+    idiomas = utils.cargar_idiomas()
 
-    # TODO: Agregar los idiomas disponibles
-    # for idioma in utils.IDIOMAS:
-    #     embed.add_field(name=idioma["idioma"], value=idioma["codigo"], inline=False)
+    # Agregar los idiomas al mensaje embed
+    for idioma in idiomas:
+        embed.add_field(name='', value=f'- **{idioma} ({idiomas[idioma]})**', inline=False)
+    embed.add_field(name='\u200b', value='', inline=False)
+    
+    # Enviar el mensaje embed
     await ctx.send(embed=embed)
 
 
