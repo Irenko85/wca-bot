@@ -1,7 +1,7 @@
 """
 Este módulo contiene el código principal del bot de Discord.
 Posee los siguientes comandos y funciones:
-    - verificar_torneos_nuevos: Verifica si hay torneos nuevos cada 12 horas y envía una notificación al canal #torneos en caso de encontrar nuevos torneos.
+    - verificar_torneos_nuevos: Verifica si hay torneos nuevos cada 2 horas y envía una notificación al canal #torneos en caso de encontrar nuevos torneos.
     - !torneos [pais]: Envía un mensaje embed con los torneos actuales del país dado, en caso de no especificar un país, se muestran los torneos de Chile.
     - !logo: Envía una imagen con el logo del bot.
 """
@@ -116,10 +116,10 @@ async def languages(ctx):
     await ctx.send(embed=embed)
 
 
-@tasks.loop(hours=12)
+@tasks.loop(hours=2)
 async def verificar_torneos_nuevos():
     '''
-    Función para verificar si hay torneos nuevos cada 12 horas.
+    Función para verificar si hay torneos nuevos cada 2 horas.
     '''
     # Obtener el canal de Discord
     canal = bot.get_channel(int(CHANNEL_ID))
